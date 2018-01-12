@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "159935768601",
+    "firebase_url": "https://pruebatecnica-6bdfa.firebaseio.com",
+    "project_id": "pruebatecnica-6bdfa",
+    "storage_bucket": "pruebatecnica-6bdfa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:159935768601:android:78946b359c59c9a5",
+        "android_client_info": {
+          "package_name": "com.example.gerson.pruebatecnica"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "159935768601-vjbfqprf66c69ves5c1tfhn70iqj8qck.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gerson.pruebatecnica",
+            "certificate_hash": "25579b81ad42f6c6f7d891c83f4923c889ed5601"
+          }
+        },
+        {
+          "client_id": "159935768601-lvh38hft5vup4dvc2482tpllv6ffek8k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkX00rK67mgGYCPq_ryx2cr9Qv0ASjwd4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "159935768601-lvh38hft5vup4dvc2482tpllv6ffek8k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:159935768601:android:87e6075ebf29d0ce",
+        "android_client_info": {
+          "package_name": "com.example.gerson.pruebatecnicaelaniin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "159935768601-t4q8mgihb3om8qsaagvvdruh40deudjl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gerson.pruebatecnicaelaniin",
+            "certificate_hash": "25579b81ad42f6c6f7d891c83f4923c889ed5601"
+          }
+        },
+        {
+          "client_id": "159935768601-lvh38hft5vup4dvc2482tpllv6ffek8k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkX00rK67mgGYCPq_ryx2cr9Qv0ASjwd4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "159935768601-lvh38hft5vup4dvc2482tpllv6ffek8k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
