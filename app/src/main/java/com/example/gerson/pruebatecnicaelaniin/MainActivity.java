@@ -72,9 +72,6 @@ public class MainActivity extends AppCompatActivity
         if (firebaseUser == null) {
             //send user to the login page
             try {
-                //startActivity(new Intent(getApplicationContext(), AuthUIActivity.class));
-                //Intent Song_detail = new Intent(getApplication(), AuthUIActivity.class);
-                //startActivity(Song_detail);
                 Intent intent = new Intent(getApplication(), AuthUIActivity.class);
                 startActivityForResult(intent, 0);
                 return;
@@ -103,7 +100,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         regionList = new ArrayList<>();
         lv = (ListView) findViewById(R.id.list);
-        new PokeData().execute();
+        //new PokeData().execute();
     }
 
     //----------------------Proceso de fondo------------------------------------//
@@ -233,7 +230,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
-
+            firebaseAuth.signOut();
+            startActivity(new Intent(this, AuthUIActivity.class));
+            finish();
         }
 
 
