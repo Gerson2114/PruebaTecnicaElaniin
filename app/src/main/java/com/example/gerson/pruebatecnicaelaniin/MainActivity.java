@@ -117,8 +117,6 @@ public class MainActivity extends AppCompatActivity
         StrictMode.setThreadPolicy(policy);
         try {
             URL urlI = new URL(firebaseUser.getPhotoUrl().toString());
-            //Bitmap bmp = BitmapFactory.decodeStream(urlI.openConnection().getInputStream());
-            //imagen.setImageBitmap(bmp);
             imagen.setImageBitmap(BitmapFactory.decodeStream((InputStream)urlI.getContent()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -146,6 +144,7 @@ public class MainActivity extends AppCompatActivity
                     ListAdapter adapter = new SimpleAdapter(
                             MainActivity.this, equipoList,
                             R.layout.list_equipos_item, new String[]{"name", "Region"}, new int[]{R.id.equipo_name, R.id.equipo_region});
+                    lv.setAdapter(adapter);
                 }
             }
 
@@ -156,7 +155,7 @@ public class MainActivity extends AppCompatActivity
         });
         //regionList = new ArrayList<>();
         equipoList = new ArrayList<>();
-        lv = (ListView) findViewById(R.id.list);
+        lv = (ListView) findViewById(R.id.list_equipos);
         //new PokeData().execute();
     }
 
