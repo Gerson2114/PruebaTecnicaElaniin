@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -23,8 +22,15 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import com.example.gerson.models.equipo;
+import com.example.gerson.models.usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,9 +47,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -55,8 +58,10 @@ public class MainActivity extends AppCompatActivity
     private ListView lv;
     // URL to get contacts JSON
     private static String url = "https://api.androidhive.info/contacts/";
-    ArrayList<HashMap<String, String>> regionList;
+    //ArrayList<HashMap<String, String>> regionList;
+    ArrayList<HashMap<String, String>> equipoList;
 
+    DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference("usuarios");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,8 +92,8 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(getApplication(), EquiposActivity.class);
+                startActivityForResult(intent, 0);
             }
         });
 
@@ -110,13 +115,39 @@ public class MainActivity extends AppCompatActivity
         name.setText(firebaseUser.getDisplayName());
         email.setText(firebaseUser.getEmail());
         //--------Verificando que el usuari tenga equipos------------
-        regionList = new ArrayList<>();
+        String id = firebaseAuth.getCurrentUser().getUid();
+        mRootReference.child(id).addValueEventListener(new ValueEventListener(){
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                usuario user = dataSnapshot.getValue(usuario.class);
+                if(user.equips != null){
+                    for (equipo e: user.equips) {
+                        HashMap<String, String> equipos = new HashMap<>();
+                        equipos.put("id", e.getId());
+                        equipos.put("name", e.getNombre());
+                        equipos.put("Region",e.getRegion());
+                        equipoList.add(equipos);
+                    }
+                    ListAdapter adapter = new SimpleAdapter(
+                            MainActivity.this, equipoList,
+                            R.layout.list_equipos_item, new String[]{"name", "Region"}, new int[]{R.id.equipo_name, R.id.equipo_region});
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        //regionList = new ArrayList<>();
+        equipoList = new ArrayList<>();
         lv = (ListView) findViewById(R.id.list);
         //new PokeData().execute();
     }
 
     //----------------------Proceso de fondo------------------------------------//
-    private class PokeData extends AsyncTask<Void, Void, String> {
+/*    private class PokeData extends AsyncTask<Void, Void, String> {
 
         @Override
         protected String doInBackground(Void... params) {
@@ -165,6 +196,7 @@ public class MainActivity extends AppCompatActivity
                         R.layout.list_item, new String[]{"name", "url"}, new int[]{R.id.name, R.id.url});
 
                 lv.setAdapter(adapter);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -191,7 +223,7 @@ public class MainActivity extends AppCompatActivity
         }
         return sb.toString();
     }
-    //-----------------------Fin proceso de fondo----------------------------------//
+    //-----------------------Fin proceso de fondo----------------------------------//*/
 
     @Override
     public void onBackPressed() {

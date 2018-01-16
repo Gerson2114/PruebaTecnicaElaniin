@@ -7,8 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.gerson.models.usuario;
@@ -18,8 +16,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -112,14 +108,19 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (result.isSuccess()) {
             // Google Sign In was successful, authenticate with Firebase
             GoogleSignInAccount account = result.getSignInAccount();
+
             //Ingresando usuario a la base de datos
             DatabaseReference usuarioRef = mRootReference.child("usuarios");
             String userId = usuarioRef.push().getKey();
             usuario u = new usuario();
             u.correo = account.getEmail().toString();
             u.nombre = account.getDisplayName().toString();
-            usuarioRef.child(account.getId()).setValue(u);
+
+            //((MyApplication) this.getApplication()).setAccountId(account.getId());
             firebaseAuthWithGoogle(account);
+            FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            usuarioRef.child(user.getUid()).setValue(u);
             startActivity(new Intent(this, MainActivity.class));
             finish();
             return;

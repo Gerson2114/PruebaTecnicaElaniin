@@ -5,8 +5,17 @@ package com.example.gerson.models;
  */
 
 public class equipo {
+    public String id;
     public String region;
     public String nombre;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getRegion() {
         return region;
