@@ -2,8 +2,11 @@ package com.example.gerson.pruebatecnicaelaniin;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -110,8 +113,19 @@ public class MainActivity extends AppCompatActivity
         TextView name = (TextView) header.findViewById(R.id.username);
         TextView email = (TextView)header.findViewById(R.id.email);
         ImageView imagen = (ImageView)header.findViewById(R.id.nav_imageView);
-        imagen.setImageURI(null);
-        imagen.setImageURI(firebaseUser.getPhotoUrl());
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        try {
+            URL urlI = new URL(firebaseUser.getPhotoUrl().toString());
+            //Bitmap bmp = BitmapFactory.decodeStream(urlI.openConnection().getInputStream());
+            //imagen.setImageBitmap(bmp);
+            imagen.setImageBitmap(BitmapFactory.decodeStream((InputStream)urlI.getContent()));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         name.setText(firebaseUser.getDisplayName());
         email.setText(firebaseUser.getEmail());
         //--------Verificando que el usuari tenga equipos------------
