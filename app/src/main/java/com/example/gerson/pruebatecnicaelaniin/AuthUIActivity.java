@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.gerson.models.usuario;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -26,7 +27,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 
 public class AuthUIActivity extends AppCompatActivity {
@@ -41,6 +43,8 @@ public class AuthUIActivity extends AppCompatActivity {
     private com.google.android.gms.common.SignInButton signInButton;
     private GoogleApiClient mGoogleApiClient;
 
+    //-------------Instanciand firebase reference ----------------------//
+    DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +75,13 @@ public class AuthUIActivity extends AppCompatActivity {
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    //if(user.getDisplayName() != null)
-                        //nameTextView.setText("HI " + user.getDisplayName().toString());
-                    //emailTextView.setText(user.getEmail().toString());
 
+/*                    DatabaseReference usuarioRef = mRootReference.child("usuarios");
+                    String userId = usuarioRef.push().getKey();
+                    usuario u = new usuario();
+                    u.correo = user.getEmail().toString();
+                    u.nombre = user.getDisplayName().toString();
+                    usuarioRef.setValue(u);*/
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -105,6 +112,13 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (result.isSuccess()) {
             // Google Sign In was successful, authenticate with Firebase
             GoogleSignInAccount account = result.getSignInAccount();
+            //Ingresando usuario a la base de datos
+            DatabaseReference usuarioRef = mRootReference.child("usuarios");
+            String userId = usuarioRef.push().getKey();
+            usuario u = new usuario();
+            u.correo = account.getEmail().toString();
+            u.nombre = account.getDisplayName().toString();
+            usuarioRef.child(account.getId()).setValue(u);
             firebaseAuthWithGoogle(account);
             startActivity(new Intent(this, MainActivity.class));
             finish();
@@ -117,7 +131,8 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
     }
 }
 
-/*    @Override
+/*
+    @Override
     public void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
@@ -129,7 +144,8 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
-    }*/
+    }
+*/
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());

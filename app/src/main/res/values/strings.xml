@@ -10,4 +10,7 @@
     <string name="sign_in_cancelled">Sign in cancelled</string>
     <string name="no_internet_connection">No internet connection</string>
     <string name="unknown_error">An unknown error occurred</string>
+
+    <string name="nav_usuario">Defaul</string>
+    <string name="nav_correo">defaul@mail.com</string>
 </resources>

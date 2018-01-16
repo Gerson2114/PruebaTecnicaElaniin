@@ -17,9 +17,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -91,13 +93,23 @@ public class MainActivity extends AppCompatActivity
         });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
+        //-------------setiando el nombre de usuario y correo-----------------------------
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        View header=navigationView.getHeaderView(0);
+        TextView name = (TextView) header.findViewById(R.id.username);
+        TextView email = (TextView)header.findViewById(R.id.email);
+        ImageView imagen = (ImageView)header.findViewById(R.id.nav_imageView);
+        imagen.setImageURI(null);
+        imagen.setImageURI(firebaseUser.getPhotoUrl());
+        name.setText(firebaseUser.getDisplayName());
+        email.setText(firebaseUser.getEmail());
+        //--------Verificando que el usuari tenga equipos------------
         regionList = new ArrayList<>();
         lv = (ListView) findViewById(R.id.list);
         //new PokeData().execute();
@@ -222,12 +234,6 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
             firebaseAuth.signOut();
