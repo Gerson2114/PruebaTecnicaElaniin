@@ -152,16 +152,13 @@ public class MainActivity extends AppCompatActivity
                 //Obtiene el texto dentro del TextView.
                 String r  = region.getText().toString();
                 String n  = nombre.getText().toString();
-                showChangeLangDialog(posicion,r,n);
-            }
-        });
-        lv.setOnLongClickListener(new AdapterView.OnLongClickListener(){
+                Intent intent = new Intent(getApplication(), PokemonActivity.class);
+                intent.putExtra("equipoID",posicion);
+                startActivityForResult(intent, 0);
 
-            @Override
-            public boolean onLongClick(View view) {
-                return false;
             }
         });
+
     }
 
     @Override
@@ -249,45 +246,4 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    public void showChangeLangDialog(int p,String r, String n) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = this.getLayoutInflater();
-        final View dialogView = inflater.inflate(R.layout.equipo_dialog, null);
-        dialogBuilder.setView(dialogView);
-        final int po = p;
-        edt = (EditText) dialogView.findViewById(R.id.edit1);
-        edt.setText(equipoList.get(po).get("name"));
-
-        dialogBuilder.setTitle("Editar Equipo");
-        dialogBuilder.setMessage("Ingrese un nuevo nombre");
-        dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //do something with edt.getText().toString();
-                firebaseAuth = FirebaseAuth.getInstance();
-                firebaseUser = firebaseAuth.getCurrentUser();
-                if(edt.getText().toString() == "" || edt.getText().toString() ==null){
-                    Toast.makeText(MainActivity.this, "Ingrese un nombre de equipo para guardar si lo desea",
-                            Toast.LENGTH_SHORT).show();
-                }else{
-                    ArrayList<equipo> elist = new ArrayList<>();
-                    equipo e = new equipo();
-                    e.setId(equipoList.get(po).get("id"));
-                    e.setNombre(edt.getText().toString());
-                    e.setRegion(equipoList.get(po).get("Region"));
-                    String pp = String.valueOf(po);
-                    usuarioRef.child(firebaseUser.getUid()).child("equips").child(pp).setValue(e);
-                    Intent intent = new Intent(getApplication(), PokemonActivity.class);
-                    startActivityForResult(intent, 0);
-                    finish();
-                }
-            }
-        });
-        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //pass
-            }
-        });
-        AlertDialog b = dialogBuilder.create();
-        b.show();
-    }
 }

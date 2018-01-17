@@ -27,7 +27,8 @@
         <activity
             android:name=".PokemonActivity"
             android:label="@string/title_activity_pokemon"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".PokemonListactivityActivity"></activity>
     </application>
 
 </manifest>
