@@ -10,7 +10,6 @@ public class usuario {
     public String nombre;
     public String correo;
     public ArrayList<equipo> equips;
-    public ArrayList<pokemon> pokemons;
 
     public String getNombre() {
         return nombre;
@@ -34,13 +33,5 @@ public class usuario {
 
     public void setEquips(ArrayList<equipo> equips) {
         this.equips = equips;
-    }
-
-    public ArrayList<pokemon> getPokemons() {
-        return pokemons;
-    }
-
-    public void setPokemons(ArrayList<pokemon> pokemons) {
-        this.pokemons = pokemons;
     }
 }

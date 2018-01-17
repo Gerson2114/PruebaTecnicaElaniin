@@ -7,11 +7,11 @@
         <item
             android:id="@+id/nav_camera"
             android:icon="@android:drawable/ic_menu_add"
-            android:title="Grupos" />
+            android:title="Administrar equipos" />
         <item
             android:id="@+id/nav_gallery"
             android:icon="@android:drawable/ic_menu_add"
-            android:title="Importar" />
+            android:title="Importar equipos" />
     </group>
     <item android:title="Communicate">
         <menu>

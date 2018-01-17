@@ -1,6 +1,7 @@
 package com.example.gerson.pruebatecnicaelaniin;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.gerson.models.equipo;
 import com.example.gerson.models.usuario;
@@ -49,11 +51,15 @@ public class EquiposActivity extends AppCompatActivity {
     FirebaseUser firebaseUser;
     DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference();
     DatabaseReference usuarioRef;
+    EditText edt;
+    usuario user;
+    String region;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_equipos);
+        setTitle("Crear equipos");
         regionList = new ArrayList<>();
         lv = (ListView) findViewById(R.id.list_equipo_item);
         new PokeData().execute();
@@ -64,8 +70,9 @@ public class EquiposActivity extends AppCompatActivity {
                 //Se busca la referencia del TextView en la vista.
                 TextView textView = (TextView) view.findViewById(R.id.name);
                 //Obtiene el texto dentro del TextView.
-                String region  = textView.getText().toString();
-                showChangeLangDialog(region);
+                region  = textView.getText().toString();
+                showChangeLangDialog();
+
             }
         });
     }
@@ -120,10 +127,7 @@ public class EquiposActivity extends AppCompatActivity {
                 ListAdapter adapter = new SimpleAdapter(
                         EquiposActivity.this, regionList,
                         R.layout.list_item, new String[]{"name", "url"}, new int[]{R.id.name, R.id.url});
-
                 lv.setAdapter(adapter);
-
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -151,44 +155,43 @@ public class EquiposActivity extends AppCompatActivity {
         return sb.toString();
     }
     //-----------------------Fin proceso de fondo----------------------------------//
-    public void showChangeLangDialog(final String region) {
+    public void showChangeLangDialog() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.equipo_dialog, null);
         dialogBuilder.setView(dialogView);
 
-        final EditText edt = (EditText) dialogView.findViewById(R.id.edit1);
+        edt = (EditText) dialogView.findViewById(R.id.edit1);
 
-        dialogBuilder.setTitle("Custom dialog");
-        dialogBuilder.setMessage("Enter text below");
+        dialogBuilder.setTitle("Equipo");
+        dialogBuilder.setMessage("Ingrese el nombre del nuevo equipo");
         dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //do something with edt.getText().toString();
                 firebaseAuth = FirebaseAuth.getInstance();
                 firebaseUser = firebaseAuth.getCurrentUser();
-
-                usuarioRef = mRootReference.child("usuarios");
-                usuarioRef.child(firebaseUser.getUid()).addValueEventListener(new ValueEventListener(){
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        usuario user = new usuario();
-                        user = dataSnapshot.getValue(usuario.class);
-                        ArrayList<equipo> elist = new ArrayList<>();
-                        equipo e = new equipo();
-                        e.setId(firebaseUser.getUid());
-                        e.setNombre(edt.getText().toString());
-                        e.setRegion(region);
-                        elist.add(e);
+                if(edt.getText().toString() == "" || edt.getText().toString() ==null){
+                    Toast.makeText(EquiposActivity.this, "Ingrese un nombre de equipo para guardar",
+                            Toast.LENGTH_SHORT).show();
+                }else{
+                    ArrayList<equipo> elist = new ArrayList<>();
+                    String userId = usuarioRef.push().getKey();
+                    equipo e = new equipo();
+                    e.setId(userId);
+                    e.setNombre(edt.getText().toString());
+                    e.setRegion(region);
+                    elist.add(e);
+                    if(user.equips !=null){
+                        user.equips.add(e);
+                    }else {
                         user.equips = elist;
-                        usuarioRef.child(firebaseUser.getUid()).setValue(user);
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                    //usuarioRef.child(firebaseUser.getUid()).child("equips").child(firebaseUser.getUid()).setValue(e);
+                    usuarioRef.child(firebaseUser.getUid()).setValue(user);
+                    Intent intent = new Intent(getApplication(), MainActivity.class);
+                    startActivityForResult(intent, 0);
+                    finish();
+                }
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -198,6 +201,28 @@ public class EquiposActivity extends AppCompatActivity {
         });
         AlertDialog b = dialogBuilder.create();
         b.show();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+        usuarioRef = mRootReference.child("usuarios");
+        usuarioRef.child(firebaseUser.getUid()).addValueEventListener(new ValueEventListener(){
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                user = new usuario();
+                user = dataSnapshot.getValue(usuario.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
 }

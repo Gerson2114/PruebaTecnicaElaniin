@@ -23,7 +23,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".AuthUIActivity" />
-        <activity android:name=".EquiposActivity"></activity>
+        <activity android:name=".EquiposActivity" />
+        <activity
+            android:name=".PokemonActivity"
+            android:label="@string/title_activity_pokemon"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

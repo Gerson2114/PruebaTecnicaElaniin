@@ -1,6 +1,7 @@
 package com.example.gerson.pruebatecnicaelaniin;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,7 +10,9 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,11 +22,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.gerson.models.equipo;
 import com.example.gerson.models.usuario;
@@ -59,10 +65,12 @@ public class MainActivity extends AppCompatActivity
 
     private String TAG = MainActivity.class.getSimpleName();
     private ListView lv;
+    EditText edt;
     // URL to get contacts JSON
     private static String url = "https://api.androidhive.info/contacts/";
     //ArrayList<HashMap<String, String>> regionList;
     ArrayList<HashMap<String, String>> equipoList;
+    DatabaseReference usuarioRef;
 
     DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference("usuarios");
     @Override
@@ -71,7 +79,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        setTitle("Equipos");
 
         activity = this;
         //--------------------Verificando si esta logeado---------------------//
@@ -123,120 +131,38 @@ public class MainActivity extends AppCompatActivity
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         name.setText(firebaseUser.getDisplayName());
         email.setText(firebaseUser.getEmail());
-        //--------Verificando que el usuari tenga equipos------------
-        String id = firebaseAuth.getCurrentUser().getUid();
-        mRootReference.child(id).addValueEventListener(new ValueEventListener(){
 
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                usuario user = dataSnapshot.getValue(usuario.class);
-                if(user.equips != null){
-                    for (equipo e: user.equips) {
-                        HashMap<String, String> equipos = new HashMap<>();
-                        equipos.put("id", e.getId());
-                        equipos.put("name", e.getNombre());
-                        equipos.put("Region",e.getRegion());
-                        equipoList.add(equipos);
-                    }
-                    ListAdapter adapter = new SimpleAdapter(
-                            MainActivity.this, equipoList,
-                            R.layout.list_equipos_item, new String[]{"name", "Region"}, new int[]{R.id.equipo_name, R.id.equipo_region});
-                    lv.setAdapter(adapter);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        //regionList = new ArrayList<>();
         equipoList = new ArrayList<>();
         lv = (ListView) findViewById(R.id.list_equipos);
-        //new PokeData().execute();
+        ListAdapter adapter = new SimpleAdapter(
+                MainActivity.this, equipoList,
+                R.layout.list_equipos_item, new String[]{"name", "Region"}, new int[]{R.id.equipo_name, R.id.equipo_region});
+
+        lv.setAdapter(adapter);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                //Se busca la referencia del TextView en la vista.
+                int posicion = i;
+                TextView nombre = (TextView) view.findViewById(R.id.equipo_name);
+                TextView region = (TextView) view.findViewById(R.id.equipo_region);
+                //Obtiene el texto dentro del TextView.
+                String r  = region.getText().toString();
+                String n  = nombre.getText().toString();
+                showChangeLangDialog(posicion,r,n);
+            }
+        });
+        lv.setOnLongClickListener(new AdapterView.OnLongClickListener(){
+
+            @Override
+            public boolean onLongClick(View view) {
+                return false;
+            }
+        });
     }
-
-    //----------------------Proceso de fondo------------------------------------//
-/*    private class PokeData extends AsyncTask<Void, Void, String> {
-
-        @Override
-        protected String doInBackground(Void... params) {
-            String response = null;
-            try {
-                URL url = new URL("https://pokeapi.co/api/v2/region/");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                // read the response
-                InputStream in = new BufferedInputStream(conn.getInputStream());
-                response = convertStreamToString(in);
-            } catch (MalformedURLException e) {
-                Log.e(TAG, "MalformedURLException: " + e.getMessage());
-            } catch (ProtocolException e) {
-                Log.e(TAG, "ProtocolException: " + e.getMessage());
-            } catch (IOException e) {
-                Log.e(TAG, "IOException: " + e.getMessage());
-            } catch (Exception e) {
-                Log.e(TAG, "Exception: " + e.getMessage());
-            }
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            try {
-                JSONObject jsonObj = new JSONObject(s);
-                // Getting JSON Array node
-                JSONArray regions = jsonObj.getJSONArray("results");
-                // looping through All Contacts
-                for (int i = 0; i < regions.length(); i++) {
-                    JSONObject c = regions.getJSONObject(i);
-                    String url = c.getString("url");
-                    String name = c.getString("name");
-
-                    // tmp hash map for single contact
-                    HashMap<String, String> region = new HashMap<>();
-                    region.put("url", url);
-                    region.put("name", name);
-                    // adding contact to contact list
-                    regionList.add(region);
-                }
-                ListAdapter adapter = new SimpleAdapter(
-                        MainActivity.this, regionList,
-                        R.layout.list_item, new String[]{"name", "url"}, new int[]{R.id.name, R.id.url});
-
-                lv.setAdapter(adapter);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    //------------------------Conventir a cadena--------------------------------//
-    private String convertStreamToString(InputStream is) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append('\n');
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return sb.toString();
-    }
-    //-----------------------Fin proceso de fondo----------------------------------//*/
 
     @Override
     public void onBackPressed() {
@@ -290,5 +216,78 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+        usuarioRef = mRootReference.child("equips");
+        String id = firebaseAuth.getCurrentUser().getUid();
+        mRootReference.child(id).addValueEventListener(new ValueEventListener(){
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                usuario user = dataSnapshot.getValue(usuario.class);
+                if(user.equips != null){
+                    for (equipo e: user.equips) {
+                        HashMap<String, String> equipos = new HashMap<>();
+                        equipos.put("id", e.getId());
+                        equipos.put("name", e.getNombre());
+                        equipos.put("Region",e.getRegion());
+                        equipoList.add(equipos);
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void showChangeLangDialog(int p,String r, String n) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.equipo_dialog, null);
+        dialogBuilder.setView(dialogView);
+        final int po = p;
+        edt = (EditText) dialogView.findViewById(R.id.edit1);
+        edt.setText(equipoList.get(po).get("name"));
+
+        dialogBuilder.setTitle("Editar Equipo");
+        dialogBuilder.setMessage("Ingrese un nuevo nombre");
+        dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //do something with edt.getText().toString();
+                firebaseAuth = FirebaseAuth.getInstance();
+                firebaseUser = firebaseAuth.getCurrentUser();
+                if(edt.getText().toString() == "" || edt.getText().toString() ==null){
+                    Toast.makeText(MainActivity.this, "Ingrese un nombre de equipo para guardar si lo desea",
+                            Toast.LENGTH_SHORT).show();
+                }else{
+                    ArrayList<equipo> elist = new ArrayList<>();
+                    equipo e = new equipo();
+                    e.setId(equipoList.get(po).get("id"));
+                    e.setNombre(edt.getText().toString());
+                    e.setRegion(equipoList.get(po).get("Region"));
+                    String pp = String.valueOf(po);
+                    usuarioRef.child(firebaseUser.getUid()).child("equips").child(pp).setValue(e);
+                    Intent intent = new Intent(getApplication(), PokemonActivity.class);
+                    startActivityForResult(intent, 0);
+                    finish();
+                }
+            }
+        });
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //pass
+            }
+        });
+        AlertDialog b = dialogBuilder.create();
+        b.show();
     }
 }
