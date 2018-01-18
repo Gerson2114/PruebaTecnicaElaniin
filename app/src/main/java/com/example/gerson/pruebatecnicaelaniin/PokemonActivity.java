@@ -67,7 +67,12 @@ public class PokemonActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         pokemonList = new ArrayList<>();
-        lv = (ListView) findViewById(R.id.list_equipo_item);
+        lv = (ListView) findViewById(R.id.list_pokemonss);
+        ListAdapter adapter = new SimpleAdapter(
+                PokemonActivity.this, pokemonList,
+                R.layout.list_poke_deta_item, new String[]{"nombre", "imagen"}, new int[]{R.id.poke_name_deta, R.id.pokemon_imageView});
+
+        lv.setAdapter(adapter);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,6 +101,12 @@ public class PokemonActivity extends AppCompatActivity {
                 if (dataSnapshot.getChildren() != null) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         // TODO: handle the post
+                        pokemon p = new pokemon();
+                        HashMap<String, String> poke = new HashMap<>();
+                        p = postSnapshot.getValue(pokemon.class);
+                        poke.put("nombre",p.getNombre());
+                        poke.put("imagen",p.getImagen());
+                        pokemonList.add(poke);
                     }
                 }
 

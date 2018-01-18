@@ -1,16 +1,27 @@
 package com.example.gerson.pruebatecnicaelaniin;
 
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+
+import com.example.gerson.models.pokemon;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,41 +39,46 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PokemonListactivityActivity extends AppCompatActivity {
+public class PokeDetalleActivity extends AppCompatActivity {
     int idE;
-    private String TAG = PokemonListactivityActivity.class.getSimpleName();
+    String urlP;
+    private String TAG = PokeDetalleActivity.class.getSimpleName();
     ArrayList<HashMap<String, String>> pokemonList;
     private ListView lv;
+    TextView poke_deta_nombre;
+    TextView poke_deta_abilidades;
+    ImageView imageView;
+    Button guardar;
+    DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference("usuarios");
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser firebaseUser;
+    pokemon p;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pokemon_listactivity);
-        setTitle("Selecione un Pokemon");
+        setContentView(R.layout.activity_poke_detalle);
+        setTitle("Pokemon detalle");
         Bundle extras = getIntent().getExtras();
-        pokemonList = new ArrayList<>();
+        p = new pokemon();
         idE = extras.getInt("equipoID");
-        lv = (ListView) findViewById(R.id.list_pokemons);
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-
+        urlP = extras.getString("url");
+        poke_deta_abilidades = (TextView) findViewById(R.id.poke_deta_abilidades);
+        poke_deta_nombre = (TextView) findViewById(R.id.poke_deta_nombre);
+        imageView = (ImageView) findViewById(R.id.pokemon_imageView);
+        guardar = (Button) findViewById(R.id.poke_deta_button);
+        guardar.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //Se busca la referencia del TextView en la vista.
-                int posicion = i;
-                TextView region = (TextView) view.findViewById(R.id.pokemon_url);
-                //Obtiene el texto dentro del TextView.
-                String r  = region.getText().toString();
-                Intent intent = new Intent(getApplication(), PokeDetalleActivity.class);
-                intent.putExtra("equipoID",idE);
-                intent.putExtra("url",r);
-                startActivityForResult(intent, 0);
-
+            public void onClick(View view) {
+                firebaseAuth = FirebaseAuth.getInstance();
+                firebaseUser = firebaseAuth.getCurrentUser();
+                String id = firebaseAuth.getCurrentUser().getUid();
+                mRootReference.child(id).child("equips").child(String.valueOf(idE)).child("pokemon").setValue(p);
+                finish();
             }
         });
         new PokeData().execute();
-
     }
-
     //----------------------Proceso de fondo------------------------------------//
     private class PokeData extends AsyncTask<Void, Void, String> {
 
@@ -70,7 +86,7 @@ public class PokemonListactivityActivity extends AppCompatActivity {
         protected String doInBackground(Void... params) {
             String response = null;
             try {
-                URL url = new URL("https://pokeapi.co/api/v2/pokemon/");
+                URL url = new URL(urlP);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 // read the response
@@ -93,28 +109,38 @@ public class PokemonListactivityActivity extends AppCompatActivity {
             super.onPostExecute(s);
             try {
                 JSONObject jsonObj = new JSONObject(s);
-                // Getting JSON Array node
-                JSONArray regions = jsonObj.getJSONArray("results");
-                // looping through All Contacts
-                for (int i = 0; i < regions.length(); i++) {
-                    JSONObject c = regions.getJSONObject(i);
-                    String url = c.getString("url");
-                    String name = c.getString("name");
-
+                String nombre = jsonObj.getString("name");
+                JSONObject sprites = jsonObj.getJSONObject("sprites");
+                JSONArray abilities = jsonObj.getJSONArray("abilities");
+                String n ="";
+                String imagen= sprites.getString("front_default");
+                for (int i = 0; i < abilities.length(); i++) {
+                    JSONObject c = abilities.getJSONObject(i);
+                    JSONObject a = c.getJSONObject("ability");
+                    String name = a.getString("name");
+                    n = n+" | "+name;
                     // tmp hash map for single contact
-                    HashMap<String, String> pokem = new HashMap<>();
-                    pokem.put("url", url);
-                    pokem.put("nombre", name);
-                    // adding contact to contact list
-                    pokemonList.add(pokem);
                 }
-                ListAdapter adapter = new SimpleAdapter(
-                        PokemonListactivityActivity.this, pokemonList,
-                        R.layout.list_pokemon_item, new String[]{"nombre","url"}, new int[]{R.id.poke_name, R.id.pokemon_url});
-                lv.setAdapter(adapter);
+
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                StrictMode.setThreadPolicy(policy);
+                try {
+                    URL urlI = new URL(imagen);
+                    imageView.setImageBitmap(BitmapFactory.decodeStream((InputStream)urlI.getContent()));
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                poke_deta_nombre.setText("Nombre: "+nombre);
+                poke_deta_abilidades.setText("Habilidades: "+ n);
+                p.setEquipo(String.valueOf(idE));
+                p.setImagen(imagen);
+                p.setNombre(nombre);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
         }
     }
     //------------------------Conventir a cadena--------------------------------//
