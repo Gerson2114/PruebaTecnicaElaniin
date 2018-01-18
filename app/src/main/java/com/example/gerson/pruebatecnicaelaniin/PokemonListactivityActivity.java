@@ -56,6 +56,7 @@ public class PokemonListactivityActivity extends AppCompatActivity {
                 intent.putExtra("equipoID",idE);
                 intent.putExtra("url",r);
                 startActivityForResult(intent, 0);
+                finish();
 
             }
         });

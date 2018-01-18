@@ -1,16 +1,17 @@
 package com.example.gerson.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by gerson on 15/01/18.
  */
 
-public class equipo {
+public class equipo implements Serializable {
     public String id;
     public String region;
     public String nombre;
-    public ArrayList<pokemon> pokemonLis;
+    public ArrayList<pokemon> pokemons;
 
     public String getId() {
         return id;
@@ -36,11 +37,11 @@ public class equipo {
         this.nombre = nombre;
     }
 
-    public ArrayList<pokemon> getPokemonLis() {
-        return pokemonLis;
+    public ArrayList<pokemon> getPokemons() {
+        return pokemons;
     }
 
-    public void setPokemonLis(ArrayList<pokemon> pokemonLis) {
-        this.pokemonLis = pokemonLis;
+    public void setPokemons(ArrayList<pokemon> pokemons) {
+        this.pokemons = pokemons;
     }
 }

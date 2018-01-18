@@ -46,17 +46,19 @@ import java.util.HashMap;
 
 public class PokemonActivity extends AppCompatActivity {
     //private String TAG = PokemonActivity.class.getSimpleName();
-    ArrayList<HashMap<String, String>> pokemonList;
+    ArrayList<pokemon> pokemonList;
     //private ListView lv;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
+    DatabaseReference usuarioRef;
     private Activity activity;
 
     private String TAG = MainActivity.class.getSimpleName();
     private ListView lv;
     EditText edt;
     int idE;
+    usuario user;
 
     DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference("usuarios");
 
@@ -64,14 +66,18 @@ public class PokemonActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pokemon);
+        setTitle("Pokemos");
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         pokemonList = new ArrayList<>();
         lv = (ListView) findViewById(R.id.list_pokemonss);
+/*
         ListAdapter adapter = new SimpleAdapter(
                 PokemonActivity.this, pokemonList,
                 R.layout.list_poke_deta_item, new String[]{"nombre", "imagen"}, new int[]{R.id.poke_name_deta, R.id.pokemon_imageView});
-
+*/
+        pokemonAdapter adapter = new pokemonAdapter(PokemonActivity.this,pokemonList);
         lv.setAdapter(adapter);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -93,8 +99,7 @@ public class PokemonActivity extends AppCompatActivity {
         String id = firebaseAuth.getCurrentUser().getUid();
         Bundle extras = getIntent().getExtras();
         idE = extras.getInt("equipoID");
-        setTitle("Pokemons");
-        Query myTopPostsQuery = mRootReference.child(id).child("equips").child(String.valueOf(idE)).child("pokemon");
+/*        Query myTopPostsQuery = mRootReference.child(id).child("equips").child(String.valueOf(idE)).child("pokemon");
         myTopPostsQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -102,11 +107,10 @@ public class PokemonActivity extends AppCompatActivity {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         // TODO: handle the post
                         pokemon p = new pokemon();
-                        HashMap<String, String> poke = new HashMap<>();
                         p = postSnapshot.getValue(pokemon.class);
-                        poke.put("nombre",p.getNombre());
-                        poke.put("imagen",p.getImagen());
-                        pokemonList.add(poke);
+                        p.setNombre(p.getNombre());
+                        p.setImagen(p.getImagen());
+                        pokemonList.add(p);
                     }
                 }
 
@@ -133,6 +137,37 @@ public class PokemonActivity extends AppCompatActivity {
             }
             // TODO: implement the ChildEventListener methods as documented above
             // ...
+        });*/
+
+
+        //---------------------------------------------------------------------------//
+        mRootReference.child(firebaseUser.getUid()).addValueEventListener(new ValueEventListener(){
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                user = new usuario();
+                user = dataSnapshot.getValue(usuario.class);
+                if(user.equips != null) {
+                    for (equipo e : user.equips) {
+                        if (e.pokemons != null) {
+                            for (pokemon p : e.pokemons) {
+                                pokemon po = new pokemon();
+                                po.setNombre(p.getNombre());
+                                po.setImagen(p.getImagen());
+                                pokemonList.add(po);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
         });
     }
+
+
+
 }

@@ -16,12 +16,17 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import com.example.gerson.models.equipo;
 import com.example.gerson.models.pokemon;
+import com.example.gerson.models.usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +48,7 @@ public class PokeDetalleActivity extends AppCompatActivity {
     int idE;
     String urlP;
     private String TAG = PokeDetalleActivity.class.getSimpleName();
-    ArrayList<HashMap<String, String>> pokemonList;
+    ArrayList<pokemon> pokemonList;
     private ListView lv;
     TextView poke_deta_nombre;
     TextView poke_deta_abilidades;
@@ -53,6 +58,7 @@ public class PokeDetalleActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
     pokemon p;
+    usuario user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +67,7 @@ public class PokeDetalleActivity extends AppCompatActivity {
         setTitle("Pokemon detalle");
         Bundle extras = getIntent().getExtras();
         p = new pokemon();
+        pokemonList = new ArrayList<pokemon>();
         idE = extras.getInt("equipoID");
         urlP = extras.getString("url");
         poke_deta_abilidades = (TextView) findViewById(R.id.poke_deta_abilidades);
@@ -73,7 +80,9 @@ public class PokeDetalleActivity extends AppCompatActivity {
                 firebaseAuth = FirebaseAuth.getInstance();
                 firebaseUser = firebaseAuth.getCurrentUser();
                 String id = firebaseAuth.getCurrentUser().getUid();
-                mRootReference.child(id).child("equips").child(String.valueOf(idE)).child("pokemon").setValue(p);
+                mRootReference.child(id).child("equips").child(String.valueOf(idE)).child("pokemons").setValue(pokemonList);
+                Intent intent = new Intent(getApplication(), MainActivity.class);
+                startActivityForResult(intent, 0);
                 finish();
             }
         });
@@ -137,6 +146,7 @@ public class PokeDetalleActivity extends AppCompatActivity {
                 p.setEquipo(String.valueOf(idE));
                 p.setImagen(imagen);
                 p.setNombre(nombre);
+                pokemonList.add(p);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -163,5 +173,38 @@ public class PokeDetalleActivity extends AppCompatActivity {
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+        String id = firebaseAuth.getCurrentUser().getUid();
+        mRootReference.child(firebaseUser.getUid()).addValueEventListener(new ValueEventListener(){
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                user = new usuario();
+                user = dataSnapshot.getValue(usuario.class);
+                if(user.equips != null) {
+                    for (equipo e : user.equips) {
+                        if (e.pokemons != null) {
+                            for (pokemon p : e.pokemons) {
+                                pokemon po = new pokemon();
+                                po.setNombre(p.getNombre());
+                                po.setImagen(p.getImagen());
+                                pokemonList.add(po);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

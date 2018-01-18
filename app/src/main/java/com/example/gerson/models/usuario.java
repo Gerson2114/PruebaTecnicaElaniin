@@ -1,12 +1,13 @@
 package com.example.gerson.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by gerson on 15/01/18.
  */
 
-public class usuario {
+public class usuario implements Serializable {
     public String nombre;
     public String correo;
     public ArrayList<equipo> equips;

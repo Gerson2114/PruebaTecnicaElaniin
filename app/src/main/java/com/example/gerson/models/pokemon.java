@@ -1,10 +1,12 @@
 package com.example.gerson.models;
 
+import java.io.Serializable;
+
 /**
  * Created by gerson on 15/01/18.
  */
 
-public class pokemon {
+public class pokemon implements Serializable {
     public String idPokemon;
     public String equipo;
     public String nombre;
